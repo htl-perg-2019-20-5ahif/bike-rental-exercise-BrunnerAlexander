@@ -18,6 +18,26 @@ namespace BikeRental.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Bike>()
+                .HasMany(b => b.Rentals)
+                .WithOne(r => r.Bike);
+
+            modelBuilder.Entity<Bike>()
+                .Property(b => b.RentalPriceFirstHour)
+                .HasColumnType("smallmoney");
+
+            modelBuilder.Entity<Bike>()
+                .Property(b => b.RentalPriceAdditionalHour)
+                .HasColumnType("smallmoney");
+
+            modelBuilder.Entity<Customer>()
+                .HasMany(c => c.Rentals)
+                .WithOne(r => r.Customer)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Rental>()
+                .Property(r => r.RentalCost)
+                .HasColumnType("smallmoney");
         }
     }
 }

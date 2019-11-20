@@ -33,12 +33,12 @@ namespace BikeRental.Model
         [Required]
         [Range(0.00, Double.MaxValue)]
         [RegularExpression(@"\d*.\d{1,2}", ErrorMessage = "Wrong format")]
-        public Decimal RentalPriceFirstHour {get; set;}
+        public decimal RentalPriceFirstHour {get; set;}
 
         [Required]
         [Range(0.00, Double.MaxValue)]
         [RegularExpression(@"\d*.\d{1,2}", ErrorMessage = "Wrong format")]
-        public Decimal RentalPriceAdditionalHour { get; set; }
+        public decimal RentalPriceAdditionalHour { get; set; }
 
         public Category BikeCategory { get; set; }
 

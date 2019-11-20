@@ -12,7 +12,7 @@ namespace BikeRental.Model
 
         public DateTime RentalBegin { get; set; }
 
-        public DateTime rentalEnd = DateTime.MaxValue;
+        private DateTime rentalEnd = DateTime.MaxValue;
         public DateTime RentalEnd
         {
             get { return rentalEnd;  }
@@ -28,18 +28,20 @@ namespace BikeRental.Model
 
         [Range(0.00, Double.MaxValue)]
         [RegularExpression(@"\d*.\d{1,2}", ErrorMessage = "Wrong format")]
-        public Decimal RentalCost { get; set; }
+        public decimal RentalCost { get; set; }
 
-        public Boolean Paid
+
+        private bool paid = false;
+        public bool Paid
         {
-            get { return Paid; }
+            get { return paid; }
             set
             {
                 if(rentalEnd < DateTime.Now || RentalCost == default)
                 {
                     throw new ArgumentException("Can only be paid when the rental already ended");
                 }
-                Paid = value;
+                paid = value;
             }
         }
 

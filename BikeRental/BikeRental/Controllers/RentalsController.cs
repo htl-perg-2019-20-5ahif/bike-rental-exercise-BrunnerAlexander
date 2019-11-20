@@ -41,6 +41,7 @@ namespace BikeRental.Controllers
             var rental = await _context.Rentals
                 .Include(r => r.Bike)
                 .Include(r => r.Customer)
+                .Where(r => r.RentalId == id)
                 .FirstOrDefaultAsync();
 
             if (rental == null)
@@ -58,7 +59,12 @@ namespace BikeRental.Controllers
             var bike = await _context.Bikes.FindAsync(rental.BikeId);
             var customer = await _context.Customers.FindAsync(rental.CustomerId);
 
-            if(bike.IsRented || customer.Rentals.Last().rentalEnd == DateTime.MaxValue)
+            if(bike.IsRented)
+            {
+                return BadRequest();
+            }
+
+            if(customer.Rentals != null && customer.Rentals.Last().RentalEnd != DateTime.MaxValue)
             {
                 return BadRequest();
             }
@@ -66,7 +72,7 @@ namespace BikeRental.Controllers
             bike.IsRented = true;
 
             rental.RentalBegin = DateTime.Now;
-            rental.rentalEnd = DateTime.MaxValue;
+            rental.RentalEnd = DateTime.MaxValue;
             rental.RentalCost = default;
 
             _context.Rentals.Add(rental);
@@ -75,7 +81,7 @@ namespace BikeRental.Controllers
             return CreatedAtAction("GetRental", new { id = rental.RentalId }, rental);
         }
 
-        // POST: api/Rentals
+        // PUT: api/Rentals/0/end
         [HttpPut("{id}/end")]
         public async Task<ActionResult<Rental>> EndRental(int id)
         {
@@ -86,15 +92,15 @@ namespace BikeRental.Controllers
                 return NotFound();
             }
 
-            if (rental.rentalEnd != DateTime.MaxValue)
+            if (rental.RentalEnd != DateTime.MaxValue)
             {
                 return BadRequest("The Rental already ended");
             }
 
 
-            rental.rentalEnd = DateTime.Now;
+            rental.RentalEnd = DateTime.Now;
             rental.Bike.IsRented = false;
-            rental.RentalCost = calculation.CalculateCost(rental.RentalBegin, rental.rentalEnd, rental.Bike.RentalPriceFirstHour, rental.Bike.RentalPriceAdditionalHour);
+            rental.RentalCost = calculation.CalculateCost(rental.RentalBegin, rental.RentalEnd, rental.Bike.RentalPriceFirstHour, rental.Bike.RentalPriceAdditionalHour);
 
             _context.Entry(rental).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -102,7 +108,7 @@ namespace BikeRental.Controllers
             return NoContent();
         }
 
-        // PUT: api/Rentals/5
+        // PUT: api/Rentals/5/paid
         [HttpPut("{id}/paid")]
         public async Task<IActionResult> PayRental(int id)
         {
